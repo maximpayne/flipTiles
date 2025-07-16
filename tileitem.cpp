@@ -42,13 +42,13 @@ void TileItem::startAnimation()
     QParallelAnimationGroup *flip = new QParallelAnimationGroup(group);
 
     QPropertyAnimation *move = new QPropertyAnimation(this, "y");
-    move->setDuration(600);
+    move->setDuration(1200);
     move->setStartValue(startY);
     move->setEndValue(endY);
     move->setEasingCurve(QEasingCurve::InQuad);
 
     QPropertyAnimation *rot = new QPropertyAnimation(m_rotation, "angle");
-    rot->setDuration(600);
+    rot->setDuration(1200);
     rot->setStartValue(0);
     rot->setEndValue(90);
     rot->setEasingCurve(QEasingCurve::InQuad);
@@ -66,6 +66,12 @@ void TileItem::onGroupFinished()
     m_rotation->setAngle(0);
     setY(m_baseY);
     emit flipFinished();
+}
+
+void TileItem::updatePixmap(const QPixmap &pixmap)
+{
+    m_pixmap = pixmap;
+    setPixmap(m_pixmap);
 }
 
 

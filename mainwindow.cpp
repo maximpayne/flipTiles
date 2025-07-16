@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::startAnimation()
 {
     finishedCount = 0;
-    scene->setBackgroundBrush(QBrush(showingFront ? frontImage : backImage));
+    scene->setBackgroundBrush(QBrush(showingFront ? backImage : frontImage));
     int idx = 0;
     for (int r = 0; r < rows; ++r) {
         for (int c = 0; c < cols; ++c) {
@@ -73,6 +73,16 @@ void MainWindow::onTileFinished()
     ++finishedCount;
     if (finishedCount == tiles.size()) {
         showingFront = !showingFront;
+        QPixmap &img = showingFront ? frontImage : backImage;
+        int tileW = img.width() / cols;
+        int tileH = img.height() / rows;
+        int idx = 0;
+        for (int r = 0; r < rows; ++r) {
+            for (int c = 0; c < cols; ++c) {
+                QPixmap piece = img.copy(c * tileW, r * tileH, tileW, tileH);
+                tiles.at(idx++)->updatePixmap(piece);
+            }
+        }
         updateBackground();
     }
 }
