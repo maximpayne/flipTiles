@@ -1,10 +1,11 @@
 #include "tileitem.h"
+#include <QParallelAnimationGroup>
 
 TileItem::TileItem(const QPixmap &front, const QPixmap &back, QGraphicsItem *parent)
     : QGraphicsPixmapItem(parent), m_front(front), m_back(back), m_frontSide(true)
 {
     setPixmap(m_front);
-    setTransformOriginPoint(boundingRect().width() / 2.0, boundingRect().height() / 2.0);
+    setTransformOriginPoint(boundingRect().width() / 2.0, 0);
 
     m_rotation = new QGraphicsRotation(this);
     m_rotation->setAxis(Qt::XAxis);
@@ -25,11 +26,13 @@ void TileItem::startFlip()
 
     group->clear();
 
-    int startAngle = m_frontSide ? 0 : 180;
-    int midAngle = startAngle + 90;
-    int endAngle = startAngle + 180;
+    int startAngle = 0;
+    int midAngle = 90;
+    int endAngle = 180;
 
-    QPropertyAnimation *first = new QPropertyAnimation(m_rotation, "angle", group);
+    QSequentialAnimationGroup *rotGroup = new QSequentialAnimationGroup(group);
+
+    QPropertyAnimation *first = new QPropertyAnimation(m_rotation, "angle");
     first->setDuration(300);
     first->setStartValue(startAngle);
     first->setEndValue(midAngle);
@@ -39,38 +42,33 @@ void TileItem::startFlip()
         setPixmap(m_frontSide ? m_front : m_back);
     });
 
-    QPropertyAnimation *second = new QPropertyAnimation(m_rotation, "angle", group);
+    QPropertyAnimation *second = new QPropertyAnimation(m_rotation, "angle");
     second->setDuration(300);
     second->setStartValue(midAngle);
     second->setEndValue(endAngle);
 
-    QPropertyAnimation *wobble1 = new QPropertyAnimation(m_rotation, "angle", group);
-    wobble1->setDuration(150);
-    wobble1->setStartValue(endAngle);
-    wobble1->setEndValue(endAngle + 10);
+    rotGroup->addAnimation(first);
+    rotGroup->addAnimation(second);
 
-    QPropertyAnimation *wobble2 = new QPropertyAnimation(m_rotation, "angle", group);
-    wobble2->setDuration(150);
-    wobble2->setStartValue(endAngle + 10);
-    wobble2->setEndValue(endAngle - 5);
+    const qreal dy = boundingRect().height() * 0.2;
+    QPropertyAnimation *move = new QPropertyAnimation(this, "y");
+    move->setDuration(600);
+    move->setStartValue(y());
+    move->setEndValue(y() + dy);
 
-    QPropertyAnimation *wobble3 = new QPropertyAnimation(m_rotation, "angle", group);
-    wobble3->setDuration(150);
-    wobble3->setStartValue(endAngle - 5);
-    wobble3->setEndValue(endAngle);
+    QParallelAnimationGroup *flipGroup = new QParallelAnimationGroup(group);
+    flipGroup->addAnimation(rotGroup);
+    flipGroup->addAnimation(move);
 
-    group->addAnimation(first);
-    group->addAnimation(second);
-    group->addAnimation(wobble1);
-    group->addAnimation(wobble2);
-    group->addAnimation(wobble3);
+    group->addAnimation(flipGroup);
 
     group->start();
 }
 
 void TileItem::onGroupFinished()
 {
-    m_rotation->setAngle(m_frontSide ? 0 : 180);
+    m_rotation->setAngle(0);
+    setY(y() - boundingRect().height() * 0.2);
     emit flipFinished();
 }
 
