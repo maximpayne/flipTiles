@@ -5,6 +5,7 @@
 #include <QSequentialAnimationGroup>
 #include <QPropertyAnimation>
 #include <QGraphicsRotation>
+#include <QParallelAnimationGroup>
 
 class TileItem : public QObject, public QGraphicsPixmapItem
 {
