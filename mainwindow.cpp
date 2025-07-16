@@ -31,10 +31,10 @@ MainWindow::MainWindow(QWidget *parent)
     for (int r = 0; r < rows; ++r) {
         for (int c = 0; c < cols; ++c) {
             QPixmap front = frontImage.copy(c * tileW, r * tileH, tileW, tileH);
-            QPixmap back = backImage.copy(c * tileW, r * tileH, tileW, tileH);
 
-            TileItem *tile = new TileItem(front, back);
+            TileItem *tile = new TileItem(front);
             tile->setPos(c * tileW, r * tileH);
+            tile->setBaseY(tile->y());
             scene->addItem(tile);
             tiles.append(tile);
             connect(tile, &TileItem::flipFinished, this, &MainWindow::onTileFinished);
@@ -49,13 +49,12 @@ void MainWindow::startAnimation()
 {
     finishedCount = 0;
     scene->setBackgroundBrush(QBrush(showingFront ? frontImage : backImage));
-    int delay = 0;
     int idx = 0;
     for (int r = 0; r < rows; ++r) {
         for (int c = 0; c < cols; ++c) {
             TileItem *tile = tiles.at(idx++);
-            QTimer::singleShot(delay, tile, [tile]() { tile->startFlip(); });
-            delay += 100; // wave effect
+            int delay = (r + c) * 100; // cascade from corner
+            QTimer::singleShot(delay, tile, [tile]() { tile->startAnimation(); });
         }
     }
 }
