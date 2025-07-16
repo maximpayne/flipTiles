@@ -7,6 +7,7 @@
 #include <QTimer>
 #include "tileitem.h"
 #include <QEvent>
+#include <QPixmap>
 
 class MainWindow : public QMainWindow
 {
@@ -21,6 +22,13 @@ private:
     QVector<TileItem*> tiles;
     int rows;
     int cols;
+    QPixmap frontImage;
+    QPixmap backImage;
+    bool showingFront;
+    int finishedCount;
+
+    void updateBackground();
+    void onTileFinished();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

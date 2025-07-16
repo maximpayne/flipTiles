@@ -14,6 +14,12 @@ public:
 
     void startFlip();
 
+signals:
+    void flipFinished();
+
+private slots:
+    void onGroupFinished();
+
 private:
     QPixmap m_front;
     QPixmap m_back;
