@@ -11,9 +11,10 @@ class TileItem : public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
 public:
-    TileItem(const QPixmap &front, const QPixmap &back, QGraphicsItem *parent = nullptr);
+    explicit TileItem(const QPixmap &pixmap, QGraphicsItem *parent = nullptr);
 
-    void startFlip();
+    void setBaseY(qreal y);
+    void startAnimation();
 
 signals:
     void flipFinished();
@@ -22,11 +23,10 @@ private slots:
     void onGroupFinished();
 
 private:
-    QPixmap m_front;
-    QPixmap m_back;
-    bool m_frontSide;
+    QPixmap m_pixmap;
     QGraphicsRotation *m_rotation;
     QSequentialAnimationGroup *group;
+    qreal m_baseY {0};
 };
 
 #endif // TILEITEM_H
