@@ -6,7 +6,7 @@ SOURCES += main.cpp \
 HEADERS += mainwindow.h \
     tileitem.h
 
-# No resources
+RESOURCES += resources.qrc
 
 TEMPLATE = app
 TARGET = flipTiles
