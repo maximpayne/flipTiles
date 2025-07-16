@@ -4,7 +4,7 @@
 #include <QEvent>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), view(new QGraphicsView(this)), scene(new QGraphicsScene(this)), rows(4), cols(4), animationStarted(false)
+    : QMainWindow(parent), view(new QGraphicsView(this)), scene(new QGraphicsScene(this)), rows(8), cols(8)
 {
     setFixedSize(800, 600);
     view->setFixedSize(800, 600);
@@ -59,10 +59,7 @@ void MainWindow::startAnimation()
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
     if (obj == view && event->type() == QEvent::MouseButtonPress) {
-        if (!animationStarted) {
-            animationStarted = true;
-            startAnimation();
-        }
+        startAnimation();
         return true; // consume
     }
     return QMainWindow::eventFilter(obj, event);

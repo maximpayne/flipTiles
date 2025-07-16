@@ -4,23 +4,21 @@
 #include <QGraphicsPixmapItem>
 #include <QSequentialAnimationGroup>
 #include <QPropertyAnimation>
+#include <QGraphicsRotation>
 
 class TileItem : public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
-    Q_PROPERTY(qreal scaleX READ scaleX WRITE setScaleX)
 public:
     TileItem(const QPixmap &front, const QPixmap &back, QGraphicsItem *parent = nullptr);
-
-    qreal scaleX() const { return m_scaleX; }
-    void setScaleX(qreal s);
 
     void startFlip();
 
 private:
     QPixmap m_front;
     QPixmap m_back;
-    qreal m_scaleX;
+    bool m_frontSide;
+    QGraphicsRotation *m_rotation;
     QSequentialAnimationGroup *group;
 };
 
