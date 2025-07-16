@@ -6,6 +6,7 @@
 #include <QGraphicsScene>
 #include <QTimer>
 #include "tileitem.h"
+#include <QEvent>
 
 class MainWindow : public QMainWindow
 {
@@ -20,6 +21,10 @@ private:
     QVector<TileItem*> tiles;
     int rows;
     int cols;
+    bool animationStarted;
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
 };
 
 #endif // MAINWINDOW_H

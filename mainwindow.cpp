@@ -1,17 +1,19 @@
 #include "mainwindow.h"
 #include <QGraphicsPixmapItem>
 #include <QDir>
+#include <QEvent>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), view(new QGraphicsView(this)), scene(new QGraphicsScene(this)), rows(4), cols(4)
+    : QMainWindow(parent), view(new QGraphicsView(this)), scene(new QGraphicsScene(this)), rows(4), cols(4), animationStarted(false)
 {
     setFixedSize(800, 600);
     view->setFixedSize(800, 600);
     setCentralWidget(view);
     view->setScene(scene);
+    view->installEventFilter(this);
 
-    QPixmap img1("image1.jpg");
-    QPixmap img2("image2.jpg");
+    QPixmap img1(":/image1.jpg");
+    QPixmap img2(":/image2.jpg");
 
     if (img1.isNull() || img2.isNull()) {
         // If images failed to load, just fill with gray
@@ -39,8 +41,6 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     scene->setSceneRect(0, 0, img1.width(), img1.height());
-
-    startAnimation();
 }
 
 void MainWindow::startAnimation()
@@ -54,6 +54,18 @@ void MainWindow::startAnimation()
             delay += 100; // wave effect
         }
     }
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == view && event->type() == QEvent::MouseButtonPress) {
+        if (!animationStarted) {
+            animationStarted = true;
+            startAnimation();
+        }
+        return true; // consume
+    }
+    return QMainWindow::eventFilter(obj, event);
 }
 
 
