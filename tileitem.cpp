@@ -14,6 +14,8 @@ TileItem::TileItem(const QPixmap &front, const QPixmap &back, QGraphicsItem *par
     setTransformations(transforms);
 
     group = new QSequentialAnimationGroup(this);
+    connect(group, &QSequentialAnimationGroup::finished,
+            this, &TileItem::onGroupFinished);
 }
 
 void TileItem::startFlip()
@@ -42,14 +44,34 @@ void TileItem::startFlip()
     second->setStartValue(midAngle);
     second->setEndValue(endAngle);
 
-    connect(group, &QSequentialAnimationGroup::finished, [this, endAngle]() {
-        m_rotation->setAngle(endAngle % 360);
-    });
+    QPropertyAnimation *wobble1 = new QPropertyAnimation(m_rotation, "angle", group);
+    wobble1->setDuration(150);
+    wobble1->setStartValue(endAngle);
+    wobble1->setEndValue(endAngle + 10);
+
+    QPropertyAnimation *wobble2 = new QPropertyAnimation(m_rotation, "angle", group);
+    wobble2->setDuration(150);
+    wobble2->setStartValue(endAngle + 10);
+    wobble2->setEndValue(endAngle - 5);
+
+    QPropertyAnimation *wobble3 = new QPropertyAnimation(m_rotation, "angle", group);
+    wobble3->setDuration(150);
+    wobble3->setStartValue(endAngle - 5);
+    wobble3->setEndValue(endAngle);
 
     group->addAnimation(first);
     group->addAnimation(second);
+    group->addAnimation(wobble1);
+    group->addAnimation(wobble2);
+    group->addAnimation(wobble3);
 
     group->start();
+}
+
+void TileItem::onGroupFinished()
+{
+    m_rotation->setAngle(m_frontSide ? 0 : 180);
+    emit flipFinished();
 }
 
 

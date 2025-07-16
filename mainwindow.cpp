@@ -2,9 +2,10 @@
 #include <QGraphicsPixmapItem>
 #include <QDir>
 #include <QEvent>
+#include <QBrush>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), view(new QGraphicsView(this)), scene(new QGraphicsScene(this)), rows(8), cols(8)
+    : QMainWindow(parent), view(new QGraphicsView(this)), scene(new QGraphicsScene(this)), rows(8), cols(8), showingFront(true), finishedCount(0)
 {
     setFixedSize(800, 600);
     view->setFixedSize(800, 600);
@@ -12,39 +13,42 @@ MainWindow::MainWindow(QWidget *parent)
     view->setScene(scene);
     view->installEventFilter(this);
 
-    QPixmap img1(":/image1.jpg");
-    QPixmap img2(":/image2.jpg");
-
-    if (img1.isNull() || img2.isNull()) {
+    frontImage = QPixmap(":/image1.jpg");
+    backImage = QPixmap(":/image2.jpg");
+    if (frontImage.isNull() || backImage.isNull()) {
         // If images failed to load, just fill with gray
-        img1 = QPixmap(800, 600);
-        img1.fill(Qt::gray);
-        img2 = img1;
+        frontImage = QPixmap(800, 600);
+        frontImage.fill(Qt::gray);
+        backImage = frontImage;
     } else {
-        img1 = img1.scaled(800, 600, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        img2 = img2.scaled(800, 600, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        frontImage = frontImage.scaled(800, 600, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        backImage = backImage.scaled(800, 600, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     }
 
-    int tileW = img1.width() / cols;
-    int tileH = img1.height() / rows;
+    int tileW = frontImage.width() / cols;
+    int tileH = frontImage.height() / rows;
 
     for (int r = 0; r < rows; ++r) {
         for (int c = 0; c < cols; ++c) {
-            QPixmap front = img1.copy(c * tileW, r * tileH, tileW, tileH);
-            QPixmap back = img2.copy(c * tileW, r * tileH, tileW, tileH);
+            QPixmap front = frontImage.copy(c * tileW, r * tileH, tileW, tileH);
+            QPixmap back = backImage.copy(c * tileW, r * tileH, tileW, tileH);
 
             TileItem *tile = new TileItem(front, back);
             tile->setPos(c * tileW, r * tileH);
             scene->addItem(tile);
             tiles.append(tile);
+            connect(tile, &TileItem::flipFinished, this, &MainWindow::onTileFinished);
         }
     }
 
-    scene->setSceneRect(0, 0, img1.width(), img1.height());
+    scene->setSceneRect(0, 0, frontImage.width(), frontImage.height());
+    updateBackground();
 }
 
 void MainWindow::startAnimation()
 {
+    finishedCount = 0;
+    scene->setBackgroundBrush(QBrush(showingFront ? frontImage : backImage));
     int delay = 0;
     int idx = 0;
     for (int r = 0; r < rows; ++r) {
@@ -63,6 +67,20 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         return true; // consume
     }
     return QMainWindow::eventFilter(obj, event);
+}
+
+void MainWindow::onTileFinished()
+{
+    ++finishedCount;
+    if (finishedCount == tiles.size()) {
+        showingFront = !showingFront;
+        updateBackground();
+    }
+}
+
+void MainWindow::updateBackground()
+{
+    scene->setBackgroundBrush(QBrush(showingFront ? frontImage : backImage));
 }
 
 
