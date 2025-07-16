@@ -21,7 +21,6 @@ private:
     QVector<TileItem*> tiles;
     int rows;
     int cols;
-    bool animationStarted;
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
