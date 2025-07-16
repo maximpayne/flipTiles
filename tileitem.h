@@ -15,6 +15,7 @@ public:
 
     void setBaseY(qreal y);
     void startAnimation();
+    void updatePixmap(const QPixmap &pixmap);
 
 signals:
     void flipFinished();
